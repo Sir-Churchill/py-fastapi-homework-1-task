@@ -12,9 +12,9 @@ router = APIRouter()
 
 @router.get("/movies/", response_model=PaginatedMoviesResponse)
 async def get_movies(
-        page: int = 1,
-        per_page: int = 10,
-        db: AsyncSession = Depends(get_db),
+        page: int = Query(default=1, ge=1),
+        per_page: int = Query(default=10, ge=1, le=20),
+    db: AsyncSession = Depends(get_db),
 ):
     offset = (page - 1) * per_page
 
@@ -24,18 +24,9 @@ async def get_movies(
     total_result = await db.execute(select(func.count()).select_from(MovieModel))
     total_items = total_result.scalar()
 
-    error_message = {
-        "loc": ["query", "page"],
-        "msg": "Input should be greater than or equal to 1",
-        "type": "value_error.number.not_ge"
-    }
-
     prev_page = f"/theater/movies/?page={page - 1}&per_page={per_page}" if page > 1 else None
     next_page = f"/theater/movies/?page={page + 1}&per_page={per_page}" \
         if offset + len(movies) < total_items else None
-
-    if per_page <= 0 or page <= 0:
-        raise HTTPException(status_code=422, detail=[error_message])
 
     total_pages = math.ceil(total_items / per_page)
 
