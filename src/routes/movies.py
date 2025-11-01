@@ -12,8 +12,8 @@ router = APIRouter()
 
 @router.get("/movies/", response_model=PaginatedMoviesResponse)
 async def get_movies(
-        page: int = Query(default=1, ge=1),
-        per_page: int = Query(default=10, ge=1, le=20),
+    page: int = Query(default=1, ge=1),
+    per_page: int = Query(default=10, ge=1, le=20),
     db: AsyncSession = Depends(get_db),
 ):
     offset = (page - 1) * per_page
